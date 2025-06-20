@@ -126,99 +126,62 @@ int main() {
 ------------------------------------------------------------------------------------------------------------
 //3. LRU
 
-#include <stdio.h>
+#include<stdio.h>
+#include <math.h>
+#include <stdbool.h>
+bool checkinset(int x);
 
-int main() {
-    int i, j, k, l, n, m;
-    int p[20];   // reference string
-    int fr[10];  // frames
-    int fs[10];  // usage flags
-    int flag1, flag2;
-    int pf = 0;  // page fault count
-    int index = 0;
-    float pr;
 
-    printf("Enter the length of the reference string: ");
-    scanf("%d", &n);
+int MAX_CAP = 3;
+int tmp_cap=3;
+int n=0, i=0, j=0, k=0;
+int set[3];
 
-    printf("Enter the reference string: ");
-    for(i = 0; i < n; i++)
-        scanf("%d", &p[i]);
 
-    printf("Enter number of frames: ");
-    scanf("%d", &m);
+int main(){
+	
+	printf("Enter No. of Processes: ");
+	scanf("%d", &n);
+	int process[n];
+	for(i=0; i<n; i++){
+		scanf("%d", &process[i]);
+	}
+	
+	int pgf=0; // initial no. of page faults
 
-    for(i = 0; i < m; i++)
-        fr[i] = -1; // initialize frames as empty
-
-    for(j = 0; j < n; j++) {
-        flag1 = 0;  // page found flag
-        flag2 = 0;  // empty frame found flag
-
-        // Check if page is already in frames
-        for(i = 0; i < m; i++) {
-            if(fr[i] == p[j]) {
-                flag1 = 1;
-                flag2 = 1;
-                break;
-            }
-        }
-
-        // If page not found, check for empty frame
-        if(flag1 == 0) {
-            for(i = 0; i < m; i++) {
-                if(fr[i] == -1) {
-                    fr[i] = p[j];
-                    flag2 = 1;
-                    pf++;  // page fault
-                    break;
-                }
-            }
-        }
-
-        // If page not found and no empty frame → replace LRU page
-        if(flag2 == 0) {
-            // Initialize usage flags to 0
-            for(i = 0; i < m; i++)
-                fs[i] = 0;
-
-            // Check recent usage of pages in frames by looking back in reference string
-            k = j - 1;
-            l = 0;
-            while(l < m && k >= 0) {
-                for(i = 0; i < m; i++) {
-                    if(fr[i] == p[k] && fs[i] == 0) {
-                        fs[i] = 1;  // mark page as recently used
-                        l++;
-                        break;
-                    }
-                }
-                k--;
-            }
-
-            // Find frame whose page was least recently used (fs[i] == 0)
-            for(i = 0; i < m; i++) {
-                if(fs[i] == 0) {
-                    index = i;
-                    break;
-                }
-            }
-
-            fr[index] = p[j]; // replace LRU page with new page
-            pf++;             // page fault
-        }
-
-        // Display frames after each page request
-        for(i = 0; i < m; i++)
-            printf("%d\t", fr[i]);
-        printf("\n");
-    }
-
-    printf("Number of page faults: %d\n", pf);
-    pr = ((float)pf / n) * 100;
-    printf("Page fault rate = %.2f%%\n", pr);
-
-    return 0;
+	for(i=0; i<MAX_CAP; i++){
+		set[i]=-1;
+	}
+	
+	for(i=0; i<n; i++){
+		if(checkinset(process[i])){
+			printf("already in set so, continued\n");
+			continue;
+		}else{
+			if(tmp_cap>0){
+				printf("initial set fill\n");
+				set[i]=process[i];
+				tmp_cap--;
+			}else{
+				printf("========================================>PAGE FAULT\n");
+				pgf++;
+				for(k=1; k<MAX_CAP; k++){
+					set[k-1]=set[k];
+				}
+				set[MAX_CAP-1]=process[i];
+			}
+		}
+		
+	}
+	printf("\nTotal Number of Page Faults in using LRU scheduling = %d\n", pgf);
+	return 0;
+}
+bool checkinset(int x){
+	printf("\ncheck for %d, set values: %d, %d, %d\n", x,set[0], set[1], set[2]);
+	for(j=0; j<MAX_CAP; j++){
+		if(set[j]==x) return true;
+	}
+	return false;
 }
 ------------------------------------------------------------------------------------------------------
 //4. Optimal Page Replacement
